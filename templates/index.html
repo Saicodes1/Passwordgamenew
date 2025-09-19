@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta         .title {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-shadow: 
+                2px 2px 4px rgba(0,0,0,0.8),
+                0 0 30px rgba(255, 107, 107, 0.6),
+                0 0 50px rgba(255, 107, 107, 0.3);
+            letter-spacing: 3px;
+            font-family: 'Creepster', 'Nosifer', cursive;
+            color: #ff4444;
+            position: relative;
+            font-weight: normal;
+        }8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Password Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Chiller&family=Butcherman&family=Eater&family=Metal+Mania&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Butcherman', 'Chiller', 'Metal Mania', cursive, monospace;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a0a0a 50%, #2d1b1b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 0, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(80, 0, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(60, 0, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 
+                2px 2px 4px rgba(0,0,0,0.8),
+                0 0 30px rgba(255, 107, 107, 0.6),
+                0 0 50px rgba(255, 107, 107, 0.3);
+            letter-spacing: 3px;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            color: #ff4444;
+            position: relative;
+        }
+
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff4444, transparent);
+            box-shadow: 0 0 10px #ff4444;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: #cc9999;
+            font-style: italic;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.1),
+                0 0 50px rgba(255, 68, 68, 0.1);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #333;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff4444, #8b0000, #ff4444);
+            border-radius: 22px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            border: 3px solid #444;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+            color: #ff6b6b;
+            font-family: 'Metal Mania', 'Butcherman', monospace;
+            font-weight: bold;
+            box-shadow: 
+                inset 0 2px 10px rgba(0,0,0,0.8),
+                0 0 20px rgba(255, 107, 107, 0.1);
+            letter-spacing: 1px;
+        }
+
+        .password-input::placeholder {
+            color: #666;
+            font-style: italic;
+        }
+
+        .password-input:focus {
+            border-color: #ff4444;
+            box-shadow: 
+                inset 0 2px 10px rgba(0,0,0,0.8),
+                0 0 0 4px rgba(255, 68, 68, 0.2),
+                0 0 30px rgba(255, 68, 68, 0.4);
+            color: #ffaaaa;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            color: #cc9999;
+            font-size: 0.9rem;
+            font-family: 'Metal Mania', 'Butcherman', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .rules-container {
+            margin-top: 2rem;
+        }
+
+        .rule {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 15px;
+            border: 2px solid;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+            transform: translateY(-30px) scale(0.8);
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            position: relative;
+            box-shadow: 
+                0 4px 15px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            animation: ghostlyAppear 0.8s ease-out forwards;
+        }
+
+        @keyframes ghostlyAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(-40px) scale(0.7) rotateX(-15deg);
+                filter: blur(5px);
+            }
+            50% {
+                opacity: 0.7;
+                transform: translateY(-10px) scale(1.05) rotateX(0deg);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateX(0deg);
+                filter: blur(0px);
+            }
+        }
+
+        .rule::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: currentColor;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .rule:hover::before {
+            width: 8px;
+        }
+
+        .rule.loaded {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation-delay: var(--delay, 0s);
+        }
+
+        .rule.passed {
+            background: linear-gradient(145deg, #0d3a0d, #1a5a1a);
+            border-color: #2d8f47;
+            color: #4ade80;
+            box-shadow: 
+                0 4px 15px rgba(0,0,0,0.5),
+                0 0 20px rgba(74, 222, 128, 0.2),
+                inset 0 0 20px rgba(74, 222, 128, 0.1);
+            animation: successGlow 0.6s ease-out;
+        }
+
+        @keyframes successGlow {
+            0% {
+                box-shadow: 
+                    0 4px 15px rgba(0,0,0,0.5),
+                    0 0 20px rgba(74, 222, 128, 0.2);
+            }
+            50% {
+                box-shadow: 
+                    0 4px 25px rgba(0,0,0,0.7),
+                    0 0 40px rgba(74, 222, 128, 0.6),
+                    inset 0 0 30px rgba(74, 222, 128, 0.2);
+                transform: scale(1.02);
+            }
+            100% {
+                box-shadow: 
+                    0 4px 15px rgba(0,0,0,0.5),
+                    0 0 20px rgba(74, 222, 128, 0.2),
+                    inset 0 0 20px rgba(74, 222, 128, 0.1);
+                transform: scale(1);
+            }
+        }
+
+        .rule.failed {
+            background: linear-gradient(145deg, #3a0d0d, #5a1a1a);
+            border-color: #8f2d2d;
+            color: #ff6b6b;
+            box-shadow: 
+                0 4px 15px rgba(0,0,0,0.5),
+                0 0 20px rgba(255, 107, 107, 0.2),
+                inset 0 0 20px rgba(255, 107, 107, 0.1);
+            animation: failureShake 0.5s ease-out;
+        }
+
+        @keyframes failureShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                color: #ffffff;
+            }
+            50% {
+                transform: scale(1.05);
+                color: #4ade80;
+                text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            }
+            100% {
+                transform: scale(1);
+                color: #ffffff;
+            }
+        }
+        
+        @keyframes scoreFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-40px) scale(0.8);
+            }
+        }
+
+        .rule-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        .rule.passed .rule-icon {
+            background: linear-gradient(145deg, #2d8f47, #4ade80);
+            color: #0d3a0d;
+            box-shadow: 
+                0 2px 8px rgba(0,0,0,0.6),
+                0 0 15px rgba(74, 222, 128, 0.4);
+        }
+
+        .rule.failed .rule-icon {
+            background: linear-gradient(145deg, #8f2d2d, #ff6b6b);
+            color: #3a0d0d;
+            box-shadow: 
+                0 2px 8px rgba(0,0,0,0.6),
+                0 0 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .rule-content {
+            flex: 1;
+        }
+
+        .rule-number {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            opacity: 0.8;
+            color: #ff9999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Metal Mania', 'Eater', monospace;
+        }
+
+        .rule-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            font-family: 'Metal Mania', 'Butcherman', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .captcha {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: linear-gradient(145deg, #000, #1a0a0a);
+            border: 1px solid #ff4444;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            box-shadow: 
+                inset 0 2px 5px rgba(0,0,0,0.8),
+                0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 2px solid #444;
+            font-size: 0.9rem;
+            color: #cc9999;
+            font-weight: 500;
+            font-family: 'Metal Mania', 'Butcherman', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .success {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(145deg, #0d3a0d, #1a5a1a);
+            border: 2px solid #2d8f47;
+            border-radius: 16px;
+            color: #4ade80;
+            margin-top: 2rem;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.7),
+                0 0 50px rgba(74, 222, 128, 0.3);
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.6);
+            font-family: 'Creepster', 'Eater', cursive;
+            letter-spacing: 2px;
+        }
+
+        .success-details {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            font-family: 'Metal Mania', 'Butcherman', monospace;
+            letter-spacing: 0.5px;
+        }
+        }
+
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #1a0a0a, #3a1a1a);
+            color: #ff6b6b;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid #444;
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.7),
+                0 0 20px rgba(255, 107, 107, 0.2);
+            font-family: 'Courier New', monospace;
+        }
+
+        .admin-link:hover {
+            background: linear-gradient(145deg, #3a1a1a, #5a2a2a);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.8),
+                0 0 30px rgba(255, 107, 107, 0.4);
+            color: #ffaaaa;
+        }
+
+        .leaderboard {
+            margin-top: 2rem;
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid #444;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.7),
+                0 0 20px rgba(255, 107, 107, 0.1);
+        }
+
+        .leaderboard h3 {
+            margin-bottom: 1rem;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #444;
+            color: #cc9999;
+            font-family: 'Courier New', monospace;
+        }
+
+        .username-input {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border: 2px solid #444;
+            border-radius: 8px;
+            width: 200px;
+            background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+            color: #ff6b6b;
+            font-family: 'Courier New', monospace;
+        }
+
+        .username-input:focus {
+            border-color: #ff4444;
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .rule {
+                padding: 0.75rem;
+            }
+            
+            .admin-link {
+                bottom: 10px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">⚡ THE PASSWORD NIGHTMARE</div>
+            <div class="subtitle">Survive the digital labyrinth... if you can</div>
+        </div>
+
+        <div class="card">
+            <input type="text" id="password" class="password-input" placeholder="Enter your password... if you dare" autocomplete="off">
+            <div id="level-indicator" style="margin:8px 0 0 0; font-size:1.1rem; color:#4ade80; font-family:'Metal Mania', monospace;">Level: easy</div>
+            
+            <div class="stats">
+                <span id="char-count">0 characters</span>
+                <span id="timer">Time: 0:00</span>
+            </div>
+
+            <div id="rules-container" class="rules-container"></div>
+
+            <div id="success-message" class="success" style="display: none;">
+                <div class="success-title">🎯 CHALLENGE COMPLETED!</div>
+                <div class="success-details">
+                    <p>You conquered all rules in <span id="final-time"></span>!</p>
+                    <p>Your password is <span id="final-length"></span> characters long.</p>
+                    <p>Final Score: <span id="final-score"></span> points!</p>
+                    <p style="margin-top: 1rem; color: #4ade80;">Session automatically recorded to leaderboard</p>
+                </div>
+            </div>
+
+            <div
+
+            <div id="progress" class="progress">
+                <span id="rules-passed">Rules passed: 0/0</span>
+                <span id="rules-total">Total rules: 0</span>
+            </div>
+        </div>
+
+        <div id="game-ui">
+            <h2 id="score-display" style="color:#fff;">Score: 0 pts</h2>
+            <div id="level-message" style="display:none;font-weight:bold; color:green; margin-top:10px;"></div>
+        </div>
+        <div id="level-complete-box" style="display:none; margin:24px 0 18px 0; padding:18px 24px; background:linear-gradient(135deg,#2d2d2d,#1a1a1a); border:3px solid #ff4444; border-radius:16px; color:#ff4444; font-family:'Creepster','Metal Mania',cursive; font-size:1.3rem; text-align:center; box-shadow:0 0 30px #ff444488;">
+            <!-- Spooky message will appear here -->
+        </div>
+        <div id="leaderboard" class="leaderboard" style="display: none;">
+            <h3>🏆 TOP PERFORMERS</h3>
+            <div id="leaderboard-list"></div>
+        </div>
+    </div>
+    <script>
+        let rules = [];
+        let startTime = Date.now();
+        let gameCompleted = false;
+        let currentScore = 0;
+        let difficultyProgress = { easy: 0, medium: 0, hard: 0, impossible: 0 };
+        let submitScoreTimeout = null;
+        let spookyMessagesShown = { easy: false, medium: false, hard: false, impossible: false }; // Track if the spooky message has been shown for each level
+
+        // Load rules and start game
+        async function init() {
+            await loadRules();
+            await loadLeaderboard();
+            document.getElementById('password').addEventListener('input', validatePassword);
+            startTimer();
+
+            // Fetch the next level from the backend/session
+            const response = await fetch('/api/next_level');
+            const data = await response.json();
+            if (data.next_level) {
+                document.getElementById('level-indicator').textContent = `Level: ${data.next_level}`;
+            }
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                if (!gameCompleted) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    document.getElementById('timer').textContent = `Time: ${formatTime(elapsed)}`;
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function loadRules() {
+            try {
+                const response = await fetch('/api/rules');
+                const data = await response.json();
+                rules = data.rules.sort((a, b) => a.unlock_at - b.unlock_at);
+            } catch (error) {
+                console.error('Failed to load rules:', error);
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const data = await response.json();
+                
+                if (data.leaderboard.length > 0) {
+                    document.getElementById('leaderboard').style.display = 'block';
+                    const list = document.getElementById('leaderboard-list');
+                    list.innerHTML = data.leaderboard.map((entry, index) => `
+                        <div class="leaderboard-item">
+                            <span>${index + 1}. ${entry.username}</span>
+                            <span>${entry.score}pts | ${formatTime(entry.time_taken)}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load leaderboard:', error);
+            }
+        }
+
+        function evaluateRule(checkFunction, password) {
+            try {
+                const func = new Function('password', `return ${checkFunction}`);
+                return func(password);
+            } catch (error) {
+                console.error('Error evaluating rule:', error);
+                return false;
+            }
+        }
+
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            document.getElementById('char-count').textContent = `${password.length} characters`;
+
+            // Store previous score for comparison
+            const previousScore = currentScore;
+
+            // Calculate current score and difficulty progress
+            currentScore = 0;
+            difficultyProgress = { easy: 0, medium: 0, hard: 0, impossible: 0 };
+
+            // Determine which rules should be shown
+            let activeRules = [];
+            for (let i = 0; i < rules.length; i++) {
+                const rule = rules[i];
+                activeRules.push(rule);
+                
+                const rulePassed = evaluateRule(rule.check_function, password);
+                if (rulePassed) {
+                    const diffInfo = getDifficultyInfo(rule.difficulty);
+                    currentScore += diffInfo.points;
+                    difficultyProgress[rule.difficulty]++;
+                }
+                
+                // If this rule is not satisfied, stop here
+                if (!rulePassed) {
+                    break;
+                }
+            }
+
+            // Don't reverse - keep natural order for top insertion
+            // activeRules.reverse();
+
+            renderRules(activeRules, password);
+
+            const passed = activeRules.filter(rule => evaluateRule(rule.check_function, password));
+            const failed = activeRules.filter(rule => !evaluateRule(rule.check_function, password));
+
+            document.getElementById('rules-passed').textContent = `Score: ${currentScore} pts | Rules: ${passed.length}/${activeRules.length}`;
+            document.getElementById('rules-total').textContent = `Total rules: ${rules.length}`;
+
+            // Animate score update if it changed
+            const scoreDisplay = document.getElementById('rules-passed');
+            if (scoreDisplay && currentScore !== previousScore) {
+                scoreDisplay.style.animation = 'none';
+                scoreDisplay.offsetHeight; // Trigger reflow
+                scoreDisplay.style.animation = 'pulse 0.3s ease-out';
+                
+                // Show score change notification
+                if (currentScore > previousScore) {
+                    showScoreChangeNotification(currentScore - previousScore);
+                }
+            }
+
+            // Send real-time score update when score increases
+            if (currentScore > 0 && currentScore !== previousScore) {
+                updateScoreRealtime();
+                // Debounce submitScore to avoid rapid calls
+                if (submitScoreTimeout) clearTimeout(submitScoreTimeout);
+                submitScoreTimeout = setTimeout(() => {
+                    submitScore(currentScore, password);
+                }, 300);
+            }
+
+            // Check if game is complete
+            if (activeRules.length > 0 && failed.length === 0 && activeRules.length === rules.length) {
+                completeGame(password);
+            }
+
+            // Update level indicator
+            const level = getCurrentLevel(currentScore);
+            const levelIndicator = document.getElementById('level-indicator');
+            let levelText = '';
+            if (level === 'completed') {
+                levelText = 'Level: completed';
+            } else {
+                levelText = `Level: ${level}`;
+            }
+            levelIndicator.textContent = levelText;
+        }
+
+        function renderRules(activeRules, password) {
+            const container = document.getElementById('rules-container');
+            
+            // Get currently rendered rule IDs to track changes
+            const currentRuleIds = Array.from(container.children).map(rule => rule.getAttribute('data-rule-id'));
+            const newRuleIds = activeRules.map(rule => rule.id.toString());
+
+            // Remove rules that are no longer active with fade-out effect
+            Array.from(container.children).forEach(ruleDiv => {
+                const ruleId = ruleDiv.getAttribute('data-rule-id');
+                if (!newRuleIds.includes(ruleId)) {
+                    ruleDiv.style.animation = 'ghostlyDisappear 0.5s ease-out forwards';
+                    setTimeout(() => {
+                        if (ruleDiv.parentNode) {
+                            ruleDiv.remove();
+                        }
+                    }, 500);
+                }
+            });
+
+            activeRules.forEach((rule, index) => {
+                const passed = evaluateRule(rule.check_function, password);
+                const ruleId = rule.id.toString();
+                
+                // Get difficulty info without emojis
+                const difficultyInfo = getDifficultyInfo(rule.difficulty);
+                
+                let ruleDiv = container.querySelector(`[data-rule-id="${ruleId}"]`);
+                const isNewRule = !ruleDiv;
+                
+                if (isNewRule) {
+                    // Create new rule element
+                    ruleDiv = document.createElement('div');
+                    ruleDiv.className = `rule`;
+                    ruleDiv.setAttribute('data-rule-id', ruleId);
+                    ruleDiv.style.setProperty('--delay', `${index * 0.1}s`);
+                    
+                    // Insert at the top (prepend) so new rules appear at the top
+                    container.insertBefore(ruleDiv, container.firstChild);
+                    
+                    // Trigger reflow before adding content
+                    ruleDiv.offsetHeight;
+                }
+                
+                // Update rule state and content
+                const previousState = ruleDiv.classList.contains('passed') ? 'passed' : 
+                                    ruleDiv.classList.contains('failed') ? 'failed' : 'none';
+                const currentState = passed ? 'passed' : 'failed';
+                
+                ruleDiv.className = `rule loaded ${currentState}`;
+                ruleDiv.style.borderLeftColor = difficultyInfo.color;
+                
+                ruleDiv.innerHTML = `
+                    <div class="rule-icon">${passed ? '✓' : '✗'}</div>
+                    <div class="rule-content">
+                        <div class="rule-number" style="color: ${difficultyInfo.color}">${difficultyInfo.name} (+${difficultyInfo.points}pts) - Rule ${rule.unlock_at + 1}</div>
+                        <div class="rule-text">${rule.text}</div>
+                    </div>
+                `;
+                
+                // Trigger success animation if state changed to passed
+                if (previousState !== 'passed' && currentState === 'passed') {
+                    ruleDiv.style.animation = 'none';
+                    ruleDiv.offsetHeight; // Trigger reflow
+                    ruleDiv.style.animation = 'successGlow 0.6s ease-out';
+                    
+                    // Send real-time score update
+                    updateScoreRealtime();
+                }
+                
+                // Add ghostly appear animation for new rules
+                if (isNewRule) {
+                    setTimeout(() => {
+                        ruleDiv.classList.add('loaded');
+                    }, index * 100);
+                }
+            });
+        }
+
+        // Add fade-out animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ghostlyDisappear {
+                0% {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                    filter: blur(0px);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateY(-30px) scale(0.8);
+                    filter: blur(3px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        function getDifficultyInfo(difficulty) {
+            const difficultyMap = {
+                'easy': { name: 'EASY', color: '#4ade80', points: 5 },
+                'medium': { name: 'MEDIUM', color: '#fbbf24', points: 10 },
+                'hard': { name: 'HARD', color: '#f87171', points: 15 },
+                'impossible': { name: 'IMPOSSIBLE', color: '#a855f7', points: 25 }
+            };
+            return difficultyMap[difficulty] || difficultyMap['easy'];
+        }
+
+        // Score thresholds (must match backend)
+        const scoreThresholds = {
+            easy: 5,
+            medium: 75,
+            hard: 120,
+            impossible: 160
+        };
+
+        function getCurrentLevel(score) {
+            if (score < scoreThresholds.easy) return 'easy';
+            if (score < scoreThresholds.medium) return 'medium';
+            if (score < scoreThresholds.hard) return 'hard';
+            if (score < scoreThresholds.impossible) return 'impossible';
+            return 'completed';
+        }
+
+        // Real-time score update function
+        async function updateScoreRealtime() {
+            try {
+                const password = document.getElementById('password').value;
+                const response = await fetch('/update_score', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        password: password,
+                        current_score: currentScore
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Score updated:', data.score);
+                }
+            } catch (error) {
+                console.log('Score update error:', error);
+            }
+        }
+        
+
+        // Show floating score change notification
+        function showScoreChangeNotification(points) {
+            const notification = document.createElement('div');
+            notification.className = 'score-notification';
+            notification.textContent = `+${points}pts!`;
+            
+            // Position near the score display
+            const scoreDisplay = document.getElementById('rules-passed');
+            const rect = scoreDisplay.getBoundingClientRect();
+            notification.style.position = 'fixed';
+            notification.style.left = rect.right + 10 + 'px';
+            notification.style.top = rect.top + 'px';
+            notification.style.zIndex = '1000';
+            notification.style.color = '#4ade80';
+            notification.style.fontWeight = 'bold';
+            notification.style.fontSize = '14px';
+            notification.style.textShadow = '0 0 10px rgba(74, 222, 128, 0.5)';
+            notification.style.animation = 'scoreFloat 2s ease-out forwards';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        function completeGame(password) {
+            if (gameCompleted) return;
+            gameCompleted = true;
+
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('final-time').textContent = formatTime(elapsed);
+            document.getElementById('final-length').textContent = password.length;
+            document.getElementById('final-score').textContent = currentScore;
+            document.getElementById('success-message').style.display = 'block';
+            
+            // Automatically save session
+            autoSaveSession(password, elapsed);
+        }
+
+        async function autoSaveSession(password, elapsed) {
+            const username = 'Anonymous Player';
+
+            try {
+                const response = await fetch('/api/save-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password_length: password.length,
+                        time_taken: elapsed,
+                        rules_completed: rules.length,
+                        easy_completed: difficultyProgress.easy,
+                        medium_completed: difficultyProgress.medium,
+                        hard_completed: difficultyProgress.hard,
+                        impossible_completed: difficultyProgress.impossible,
+                        completed: true
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Session auto-saved with score:', result.score);
+                loadLeaderboard();
+            } catch (error) {
+                console.error('Failed to auto-save session:', error);
+            }
+        }
+        async function submitScore(score,password){
+            const res=await fetch("/update_score",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({current_score:score,password:password})
+            });
+            const data=await res.json();
+            document.getElementById("score-display").innerText="Score:"+data.score;
+            const spookyBox=document.getElementById("level-complete-box");
+            // Always hide the box first
+            spookyBox.style.display = "none";
+            if(data.success && data.level_cleared && data.cleared_level_message){
+                let spookyMsg = "";
+                let levelKey = null; // Track the level for which the message is being shown
+
+                if(data.cleared_level_message.includes("Easy")) {
+                    spookyMsg = "👻 <b>The shadows whisper...</b><br><span style='color:#fff'>Easy Level Survived!</span><br>But the nightmare deepens...";
+                    levelKey = "easy";
+                } else if(data.cleared_level_message.includes("Medium")) {
+                    spookyMsg = "💀 <b>The crypt doors creak...</b><br><span style='color:#fff'>Medium Level Conquered!</span><br>Darkness grows stronger...";
+                    levelKey = "medium";
+                } else if(data.cleared_level_message.includes("Hard")) {
+                    spookyMsg = "🕯️ <b>The spirits howl...</b><br><span style='color:#fff'>Hard Level Defeated!</span><br>Impossible horrors await...";
+                    levelKey = "hard";
+                } else if(data.cleared_level_message.includes("Impossible")) {
+                    spookyMsg = "🎃 <b>The final curse is broken!</b><br><span style='color:#fff'>Impossible Level Beaten!</span><br>You escaped the password nightmare!";
+                    levelKey = "impossible";
+                } else {
+                    spookyMsg = data.cleared_level_message;
+                }
+                spookyBox.innerHTML = spookyMsg;
+                spookyBox.style.display = "block";
+
+                // Scroll to the spooky box only if it hasn't been shown for this level
+                if (levelKey && !spookyMessagesShown[levelKey]) {
+                    setTimeout(() => {
+                        spookyBox.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 100); // slight delay to ensure it's visible
+                    spookyMessagesShown[levelKey] = true; // Mark the message for this level as shown
+                }
+
+                // Update the level indicator below the password box
+                const levelIndicator = document.getElementById("level-indicator");
+                if (levelKey) {
+                    levelIndicator.textContent = `Level: ${levelKey}`;
+                }
+            }
+        }   
+
+        // Initialize the game
+        init();
+    </script>
+    
+</body>
+</html>

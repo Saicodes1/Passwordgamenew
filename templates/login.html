@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - The Password Game</title>
+    <style>
+        /* --- Copy the entire CSS from index.html here --- */
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Chiller&family=Butcherman&family=Eater&family=Metal+Mania&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Butcherman', 'Chiller', 'Metal Mania', cursive, monospace;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a0a0a 50%, #2d1b1b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 0, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(80, 0, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(60, 0, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+        .title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 
+                2px 2px 4px rgba(0,0,0,0.8),
+                0 0 30px rgba(255, 107, 107, 0.6),
+                0 0 50px rgba(255, 107, 107, 0.3);
+            letter-spacing: 3px;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            color: #ff4444;
+            position: relative;
+        }
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff4444, transparent);
+            box-shadow: 0 0 10px #ff4444;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: #cc9999;
+            font-style: italic;
+        }
+        .card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.1),
+                0 0 50px rgba(255, 68, 68, 0.1);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #333;
+            position: relative;
+            text-align: center;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff4444, #8b0000, #ff4444);
+            border-radius: 22px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        .google-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(145deg, #fff, #f1f1f1);
+            color: #222;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-family: 'Metal Mania', 'Butcherman', monospace;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            margin-top: 2rem;
+        }
+        .google-btn:hover {
+            background: linear-gradient(145deg, #ff4444, #fff);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(255, 68, 68, 0.2);
+        }
+        .google-icon {
+            width: 28px;
+            height: 28px;
+            vertical-align: middle;
+        }
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #1a0a0a, #3a1a1a);
+            color: #ff6b6b;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid #444;
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.7),
+                0 0 20px rgba(255, 107, 107, 0.2);
+            font-family: 'Courier New', monospace;
+        }
+        .admin-link:hover {
+            background: linear-gradient(145deg, #3a1a1a, #5a2a2a);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.8),
+                0 0 30px rgba(255, 107, 107, 0.4);
+            color: #ffaaaa;
+        }
+        @media (max-width: 768px) {
+            .title { font-size: 2.5rem; }
+            .card { padding: 1.5rem; }
+            .admin-link { bottom: 10px; right: 10px; padding: 8px 16px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">⚡ THE PASSWORD NIGHTMARE</div>
+            <div class="subtitle">Sign in to play and join the leaderboard</div>
+        </div>
+        <div class="card">
+            <a href="{{ url_for('google.login') }}">
+                <button class="google-btn">
+                    <img src="static/google-logo-search-new-svgrepo-com (4).svg" class="google-icon" alt="Google Logo">
+                    Sign in with Google
+                </button>
+            </a>
+        </div>
+    </div>
+    <a href="/admin-login" class="admin-link">Admin Login</a>
+</body>
+</html>

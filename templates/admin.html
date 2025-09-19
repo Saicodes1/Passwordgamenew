@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Password Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Chiller&family=Butcherman&family=Eater&family=Metal+Mania&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Metal Mania', 'Butcherman', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #374151;
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: 'Creepster', 'Nosifer', cursive;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .card h2 {
+            color: #374151;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .input, .textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        .textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .input:focus, .textarea:focus {
+            border-color: #667eea;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .button-danger:hover {
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .rules-list {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .recent-session {
+            background: rgba(16, 185, 129, 0.1) !important;
+            animation: pulse-bg 2s infinite;
+        }
+        
+        .live-indicator {
+            font-size: 10px;
+            color: #ef4444;
+            font-weight: bold;
+            animation: blink 1s infinite;
+            margin-left: 5px;
+        }
+        
+        @keyframes pulse-bg {
+            0%, 100% { background: rgba(16, 185, 129, 0.1); }
+            50% { background: rgba(16, 185, 129, 0.2); }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: #f3f4f6;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .scoreboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .scoreboard-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .scoreboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .scoreboard-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        .rank-1 { background: #fbbf24; }
+        .rank-2 { background: #9ca3af; }
+        .rank-3 { background: #cd7c2f; }
+        .rank-other { background: #6b7280; }
+
+        .rules-header {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .rule-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            gap: 1rem;
+        }
+
+        .rule-item:last-child {
+            border-bottom: none;
+        }
+
+        .rule-content {
+            flex: 1;
+        }
+
+        .rule-number {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .rule-text {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .rule-function {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 0.5rem;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .rule-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .sessions-table th,
+        .sessions-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sessions-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .rule-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .rule-actions {
+                justify-content: flex-end;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1 class="title">🎮 Admin Panel</h1>
+            <div class="nav">
+                <a href="/">← Back to Game</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        {% if message %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="showTab('scoreboard')">🏆 Scoreboard</button>
+            <button class="tab-btn" onclick="showTab('rules')">🎯 Rules</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-rules">{{ stats.total_rules }}</div>
+                <div class="stat-label">Total Rules</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-sessions">{{ stats.total_sessions }}</div>
+                <div class="stat-label">Total Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completed-sessions">{{ stats.completed_sessions }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avg-time">{{ "%.1f"|format(stats.avg_time) }}s</div>
+                <div class="stat-label">Avg. Time</div>
+            </div>
+        </div>
+
+        <div class="cards">
+            <!-- Difficulty Configuration -->
+            <div class="card">
+                <h2>⚙️ Difficulty Configuration</h2>
+                <form id="difficulty-config-form">
+                    <div class="form-group">
+                        <label class="label">Easy Questions Count</label>
+                        <input type="number" id="easy-count" class="input" min="0" max="10" value="2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Medium Questions Count</label>
+                        <input type="number" id="medium-count" class="input" min="0" max="10" value="2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Hard Questions Count</label>
+                        <input type="number" id="hard-count" class="input" min="0" max="10" value="2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Impossible Questions Count</label>
+                        <input type="number" id="impossible-count" class="input" min="0" max="10" value="2" required>
+                    </div>
+                    
+                    <button type="submit" class="button">Update Configuration</button>
+                </form>
+            </div>
+
+            <!-- Add New Rule -->
+            <div class="card">
+                <h2>➕ Add New Rule</h2>
+                <form id="add-rule-form">
+                    <div class="form-group">
+                        <label class="label">Difficulty Level</label>
+                        <select id="rule-difficulty" class="input" required>
+                            <option value="easy">Easy (+5 pts)</option>
+                            <option value="medium">Medium (+10 pts)</option>
+                            <option value="hard">Hard (+15 pts)</option>
+                            <option value="impossible">Impossible (+25 pts)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Rule Text</label>
+                        <input type="text" id="rule-text" class="input" placeholder="Your password must..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label">Check Function (JavaScript)</label>
+                        <textarea id="rule-function" class="textarea" placeholder="password.length >= 8" required></textarea>
+                        <small style="color: #6b7280; font-size: 0.8rem;">
+                            Example: password.length >= 8 && /[A-Z]/.test(password)
+                        </small>
+                    </div>
+                    
+                    <button type="submit" class="button">Add Rule</button>
+                </form>
+            </div>
+
+            <!-- All Users -->
+            <div class="card">
+                <h2>👥 All Users</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table class="sessions-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Best Score</th>
+                                <th>Best Time</th>
+                                <th>Total Time</th>
+                                <th>Sessions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <!-- Users will be loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Sessions -->
+            <div class="card">
+                <h2>📊 Recent Sessions</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table class="sessions-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Score</th>
+                                <th>Time</th>
+                                <th>Rules</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-tbody">
+                            {% for session in recent_sessions %}
+                            <tr>
+                                <td>{{ session.username }}</td>
+                                <td>{{ session.score or 0 }}pts</td>
+                                <td>{{ "%.1f"|format(session.time_taken or 0) }}s</td>
+                                <td>{{ session.rules_completed or 0 }}</td>
+                                <td>
+                                    {% if session.completed %}
+                                        <span style="color: #10b981;">✓ Completed</span>
+                                    {% else %}
+                                        <span style="color: #ef4444;">✗ Incomplete</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div> <!-- End Dashboard Tab -->
+
+        <!-- Scoreboard Tab -->
+        <div id="scoreboard-tab" class="tab-content">
+            <div class="card">
+                <h2>🏆 Player Scoreboard</h2>
+                <p style="color: #6b7280; margin-bottom: 1.5rem;">Real-time leaderboard showing player statistics and achievements</p>
+                
+                <table class="scoreboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Max Score</th>
+                            <th>Games Played</th>
+                            <th>Avg Score</th>
+                            <th>Total Time</th>
+                            <th>Last Played</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreboard-tbody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rules Tab -->
+        <div id="rules-tab" class="tab-content">
+            <div class="rules-list">
+                <div class="rules-header">
+                    <h2>🎯 Password Rules ({{ rules|length }} total)</h2>
+                    <p style="color: #6b7280; margin-top: 0.5rem;">Rules are shown in order. New rules will be added at the top.</p>
+                </div>
+                
+                <div id="rules-container">
+                    {% for rule in rules %}
+                    <div class="rule-item" data-rule-id="{{ rule.id }}">
+                        <div class="rule-content">
+                            <div class="rule-number">Rule {{ loop.index }}</div>
+                            <div class="rule-text">{{ rule.text }}</div>
+                            <div class="rule-meta">
+                                <span class="difficulty-badge difficulty-{{ rule.difficulty }}">{{ rule.difficulty.upper() }}</span>
+                                <span class="unlock-info">Unlocks at {{ rule.unlock_at }} characters</span>
+                            </div>
+                        </div>
+                        <div class="rule-actions">
+                            <button class="btn-edit" onclick="editRule({{ rule.id }})">✏️ Edit</button>
+                            <button class="btn-delete" onclick="deleteRule({{ rule.id }})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and mark button as active
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load tab-specific data
+            if (tabName === 'scoreboard') {
+                loadScoreboard();
+            }
+        }
+
+        // Load scoreboard data
+        async function loadScoreboard() {
+            try {
+                const response = await fetch('/api/admin/scoreboard');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('scoreboard-tbody');
+                tbody.innerHTML = data.scoreboard.map((player, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                    const totalMinutes = Math.floor(player.total_time / 60);
+                    const totalSeconds = player.total_time % 60;
+                    
+                    return `
+                        <tr>
+                            <td>
+                                <span class="rank-badge ${rankClass}">${rank}</span>
+                            </td>
+                            <td><strong>${player.username}</strong></td>
+                            <td><strong>${player.max_score}</strong> pts</td>
+                            <td>${player.games_played}</td>
+                            <td>${player.avg_score} pts</td>
+                            <td>${totalMinutes}m ${totalSeconds}s</td>
+                            <td>${player.last_played}</td>
+                        </tr>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Failed to load scoreboard:', error);
+                document.getElementById('scoreboard-tbody').innerHTML = `
+                    <tr><td colspan="7" style="text-align: center; color: #ef4444;">
+                        Failed to load scoreboard data
+                    </td></tr>
+                `;
+            }
+        }
+
+        // Load difficulty configuration on page load
+        loadDifficultyConfig();
+        loadUsers();
+        updateStats();
+
+        async function loadDifficultyConfig() {
+            try {
+                const response = await fetch('/api/difficulty-config');
+                const data = await response.json();
+                
+                document.getElementById('easy-count').value = data.easy_count;
+                document.getElementById('medium-count').value = data.medium_count;
+                document.getElementById('hard-count').value = data.hard_count;
+                document.getElementById('impossible-count').value = data.impossible_count;
+            } catch (error) {
+                console.error('Failed to load difficulty config:', error);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('users-tbody');
+                tbody.innerHTML = data.users.map(user => `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.best_score}pts</td>
+                        <td>${user.best_time ? (user.best_time + 's') : 'N/A'}</td>
+                        <td>${formatTime(user.total_time)}</td>
+                        <td>${user.sessions_count}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load users:', error);
+            }
+        }
+
+        function formatTime(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update difficulty configuration
+        document.getElementById('difficulty-config-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const easyCount = parseInt(document.getElementById('easy-count').value);
+            const mediumCount = parseInt(document.getElementById('medium-count').value);
+            const hardCount = parseInt(document.getElementById('hard-count').value);
+            const impossibleCount = parseInt(document.getElementById('impossible-count').value);
+            
+            try {
+                const response = await fetch('/api/difficulty-config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        easy_count: easyCount,
+                        medium_count: mediumCount,
+                        hard_count: hardCount,
+                        impossible_count: impossibleCount
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Configuration updated successfully!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to update configuration. Please try again.');
+            }
+        });
+
+        // Add new rule
+        document.getElementById('add-rule-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('rule-text').value;
+            const checkFunction = document.getElementById('rule-function').value;
+            const difficulty = document.getElementById('rule-difficulty').value;
+            
+            try {
+                const response = await fetch('/api/admin/rules', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        check_function: checkFunction,
+                        difficulty: difficulty
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to add rule. Please try again.');
+            }
+        });
+
+        // Delete rule
+        async function deleteRule(ruleId) {
+            if (!confirm('Are you sure you want to delete this rule?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/rules/${ruleId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.querySelector(`[data-rule-id="${ruleId}"]`).remove();
+                    updateStats();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to delete rule. Please try again.');
+            }
+        }
+
+        // Update stats
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/admin/stats');
+                const data = await response.json();
+                
+                document.getElementById('total-rules').textContent = data.total_rules;
+                document.getElementById('total-sessions').textContent = data.total_sessions;
+                document.getElementById('completed-sessions').textContent = data.completed_sessions;
+                document.getElementById('avg-time').textContent = data.avg_time.toFixed(1) + 's';
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+            }
+        }
+
+        // Refresh sessions and users every 5 seconds for real-time monitoring
+        setInterval(async function() {
+            try {
+                const response = await fetch('/api/admin/recent-sessions');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('sessions-tbody');
+                const currentTime = new Date();
+                
+                tbody.innerHTML = data.sessions.map(session => {
+                    const sessionTime = new Date(session.created_at);
+                    const timeDiff = (currentTime - sessionTime) / 1000; // seconds
+                    const isRecent = timeDiff < 30; // Less than 30 seconds old
+                    
+                    return `
+                    <tr class="${isRecent ? 'recent-session' : ''}">
+                        <td>
+                            ${session.username}
+                            ${isRecent ? '<span class="live-indicator">🔴 LIVE</span>' : ''}
+                        </td>
+                        <td>${session.score || 0}pts</td>
+                        <td>${session.time_taken ? session.time_taken.toFixed(1) + 's' : 'N/A'}</td>
+                        <td>${session.rules_completed || 0}</td>
+                        <td>
+                            ${session.completed ? 
+                                '<span style="color: #10b981;">✓ Completed</span>' : 
+                                '<span style="color: #ef4444;">✗ Incomplete</span>'
+                            }
+                        </td>
+                    </tr>
+                `;}).join('');
+                
+                updateStats();
+                loadUsers();
+                
+                // Update scoreboard if it's the active tab
+                const scoreboardTab = document.getElementById('scoreboard-tab');
+                if (scoreboardTab && scoreboardTab.classList.contains('active')) {
+                    loadScoreboard();
+                }
+                
+            } catch (error) {
+                console.error('Failed to refresh data:', error);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
