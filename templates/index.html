@@ -558,14 +558,11 @@
         <div id="level-complete-box" style="display:none; margin:24px 0 18px 0; padding:18px 24px; background:linear-gradient(135deg,#2d2d2d,#1a1a1a); border:3px solid #ff4444; border-radius:16px; color:#ff4444; font-family:'Creepster','Metal Mania',cursive; font-size:1.3rem; text-align:center; box-shadow:0 0 30px #ff444488;">
             <!-- Spooky message will appear here -->
         </div>
-        <div id="leaderboard" class="leaderboard" style="display: none;">
-            <h3>🏆 TOP PERFORMERS</h3>
-            <div id="leaderboard-list"></div>
-        </div>
     </div>
     <script>
         let rules = [];
-        let startTime = Date.now();
+        let elapsedSeconds = 0;
+        let timerInterval;
         let gameCompleted = false;
         let currentScore = 0;
         let difficultyProgress = { easy: 0, medium: 0, hard: 0, impossible: 0 };
@@ -575,42 +572,48 @@
         // Load rules and start game
         async function init() {
             await loadRules();
-            await loadLeaderboard();
             document.getElementById('password').addEventListener('input', validatePassword);
 
-            // Fetch the session state (start time, score, password) from the backend/session
+            // Fetch the session state (elapsed time, score, password) from the backend/session
             const stateResponse = await fetch('/api/session_state');
             const stateData = await stateResponse.json();
-            if (stateData.session_start_time) {
-                startTime = stateData.session_start_time * 1000; // convert to ms
-            } else {
-                startTime = Date.now();
+            
+            // Initialize the timer with the saved elapsed time
+            if (typeof stateData.elapsed_time === "number") {
+                elapsedSeconds = stateData.elapsed_time;
+                document.getElementById('timer').textContent = `Time: ${formatTime(elapsedSeconds)}`;
             }
+            
             if (typeof stateData.session_score === "number") {
                 currentScore = stateData.session_score;
                 document.getElementById("score-display").innerText = "Score: " + currentScore + " pts";
             }
-            if (typeof stateData.session_password === "string" && stateData.session_password.length > 0) {
-                document.getElementById("password").value = stateData.session_password;
-                // Trigger validation so rules are shown for the resumed password
-                validatePassword();
-            }
 
+            // Start timer first
             startTimer();
-
+            
             // Fetch the next level from the backend/session
             const response = await fetch('/api/next_level');
             const data = await response.json();
             if (data.next_level) {
                 document.getElementById('level-indicator').textContent = `Level: ${data.next_level}`;
             }
+            
+            // Set password and validate AFTER rules are loaded to ensure proper validation
+            if (typeof stateData.session_password === "string" && stateData.session_password.length > 0) {
+                document.getElementById("password").value = stateData.session_password;
+                // Force validation after a small delay to ensure rules are properly loaded
+                setTimeout(() => {
+                    validatePassword();
+                }, 300);
+            }
         }
 
         function startTimer() {
-            setInterval(() => {
+            timerInterval = setInterval(() => {
                 if (!gameCompleted) {
-                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    document.getElementById('timer').textContent = `Time: ${formatTime(elapsed)}`;
+                    elapsedSeconds++;
+                    document.getElementById('timer').textContent = `Time: ${formatTime(elapsedSeconds)}`;
                 }
             }, 1000);
         }
@@ -628,26 +631,6 @@
                 rules = data.rules.sort((a, b) => a.unlock_at - b.unlock_at);
             } catch (error) {
                 console.error('Failed to load rules:', error);
-            }
-        }
-
-        async function loadLeaderboard() {
-            try {
-                const response = await fetch('/api/leaderboard');
-                const data = await response.json();
-                
-                if (data.leaderboard.length > 0) {
-                    document.getElementById('leaderboard').style.display = 'block';
-                    const list = document.getElementById('leaderboard-list');
-                    list.innerHTML = data.leaderboard.map((entry, index) => `
-                        <div class="leaderboard-item">
-                            <span>${index + 1}. ${entry.username}</span>
-                            <span>${entry.score}pts | ${formatTime(entry.time_taken)}</span>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Failed to load leaderboard:', error);
             }
         }
 
@@ -876,7 +859,8 @@
                     },
                     body: JSON.stringify({ 
                         password: password,
-                        current_score: currentScore
+                        current_score: currentScore,
+                        elapsed_time: elapsedSeconds  // Send the current elapsed time
                     })
                 });
                 
@@ -920,14 +904,16 @@
             if (gameCompleted) return;
             gameCompleted = true;
 
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('final-time').textContent = formatTime(elapsed);
+            // Stop the timer
+            clearInterval(timerInterval);
+            
+            document.getElementById('final-time').textContent = formatTime(elapsedSeconds);
             document.getElementById('final-length').textContent = password.length;
             document.getElementById('final-score').textContent = currentScore;
             document.getElementById('success-message').style.display = 'block';
             
-            // Automatically save session
-            autoSaveSession(password, elapsed);
+            // Automatically save session with the final elapsed time
+            autoSaveSession(password, elapsedSeconds);
         }
 
         async function autoSaveSession(password, elapsed) {
@@ -941,6 +927,7 @@
                     },
                     body: JSON.stringify({
                         username: username,
+                        password: password,  // Send the actual password
                         password_length: password.length,
                         time_taken: elapsed,
                         rules_completed: rules.length,
@@ -954,22 +941,27 @@
 
                 const result = await response.json();
                 console.log('Session auto-saved with score:', result.score);
-                loadLeaderboard();
+                // Removed leaderboard loading here
             } catch (error) {
                 console.error('Failed to auto-save session:', error);
             }
         }
-        async function submitScore(score,password){
-            const res=await fetch("/update_score",{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({current_score:score,password:password})
+        async function submitScore(score, password){
+            const res = await fetch("/update_score", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    current_score: score, 
+                    password: password,
+                    elapsed_time: elapsedSeconds
+                })
             });
-            const data=await res.json();
-            document.getElementById("score-display").innerText="Score:"+data.score;
-            const spookyBox=document.getElementById("level-complete-box");
+            const data = await res.json();  // This was missing - need to await the JSON response
+            document.getElementById("score-display").innerText = "Score:" + data.score;
+            const spookyBox = document.getElementById("level-complete-box");  // This was also missing
             // Always hide the box first
             spookyBox.style.display = "none";
+            
             if(data.success && data.level_cleared && data.cleared_level_message){
                 let spookyMsg = "";
                 let levelKey = null; // Track the level for which the message is being shown

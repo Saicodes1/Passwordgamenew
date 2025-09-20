@@ -54,6 +54,7 @@ class GameSession(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     username = db.Column(db.String(120), nullable=True)  # For guest or to store display name/email
     password_length = db.Column(db.Integer)
+    password = db.Column(db.String(500), nullable=True)  # Store the actual password text
     time_taken = db.Column(db.Integer)  # in seconds
     rules_completed = db.Column(db.Integer)
     score = db.Column(db.Integer, default=0)  # Total score based on difficulty
@@ -165,9 +166,11 @@ def google_post_auth():
         # Resume the session and always set next_level to "easy"
         flash("Welcome back! Resuming your progress.", "success")
         session["next_level"] = "easy"
-        session["session_start_time"] = int(existing_session.created_at.timestamp())
+        
+        # Store the elapsed time directly
+        session["elapsed_time"] = existing_session.time_taken or 0
         session["session_score"] = existing_session.score or 0
-        session["session_password"] = getattr(existing_session, "password", "") or ""  # Store last password
+        session["session_password"] = existing_session.password or ""
     else:
         # Create a new session if none exists
         new_session = GameSession(
@@ -182,7 +185,7 @@ def google_post_auth():
         db.session.add(new_session)
         db.session.commit()
         session["next_level"] = "easy"  # Start from the easy level
-        session["session_start_time"] = int(datetime.utcnow().timestamp())
+        session["elapsed_time"] = 0  # Start with 0 elapsed time
         session["session_score"] = 0
         session["session_password"] = ""
         flash("New session started. Good luck!", "success")
@@ -580,6 +583,7 @@ def update_score():
         data = request.get_json() or {}
         current_score = data.get('current_score', 0)
         password = data.get('password', '')
+        elapsed_time = data.get('elapsed_time', 0)  # Get elapsed time from frontend
 
         if current_user.is_authenticated:
             username = current_user.full_name or current_user.username or current_user.email
@@ -615,7 +619,8 @@ def update_score():
                 user_id=user_id,
                 username=username,
                 password_length=len(password),
-                time_taken=0,
+                password=password,  # Store the actual password
+                time_taken=elapsed_time,
                 rules_completed=0,
                 score=current_score,
                 completed=False
@@ -623,13 +628,17 @@ def update_score():
             db.session.add(active_session)
 
         else:
-            previous_score = active_session.score or 0  # Get previous score before updating
+            previous_score = active_session.score or 0
             active_session.user_id = user_id or active_session.user_id
             active_session.username = username or active_session.username
             active_session.password_length = len(password)
+            active_session.password = password  # Update the stored password
             # Always update score to current_score
             active_session.score = current_score
-            active_session.time_taken = int((current_time - active_session.created_at).total_seconds())
+            
+            # Update time_taken without changing the reference point
+            # This preserves the continuous timer across sessions
+            active_session.time_taken = elapsed_time  # Update with elapsed time from frontend
 
         # Update User table for logged-in users if this is a new best score
         if current_user.is_authenticated:
@@ -654,9 +663,10 @@ def update_score():
                 elif level == "impossible":
                     cleared_level_message = "🏆 Impossible completed! You beat the game!"
 
-        # Store the latest password in session for resume
+        # Store the latest elapsed time and password in session
+        session["elapsed_time"] = elapsed_time
         session["session_password"] = password
-
+        
         db.session.commit()
 
         return jsonify({
@@ -696,6 +706,7 @@ def save_session():
         user_id=user_id,
         username=username_for_record or 'Guest',
         password_length=data.get('password_length'),
+        password=data.get('password', ''),  # Store the password from the request
         time_taken=time_taken,
         rules_completed=data.get('rules_completed'),
         score=score,
@@ -772,15 +783,28 @@ def get_next_level():
 
 @app.route('/api/session_state')
 def get_session_state():
-    # Returns the session start time, score, and password for resume
-    start_time = session.get("session_start_time", int(datetime.utcnow().timestamp()))
+    # Returns the elapsed time, score, and password for resume
+    elapsed_time = session.get("elapsed_time", 0)
     score = session.get("session_score", 0)
     password = session.get("session_password", "")
-    return jsonify({"session_start_time": start_time, "session_score": score, "session_password": password})
+    return jsonify({"elapsed_time": elapsed_time, "session_score": score, "session_password": password})
 
 def init_database():
     """Initialize database with default data"""
     with app.app_context():
+        # We need to add the column to existing tables
+        try:
+            # Check if the password column already exists
+            inspector = db.inspect(db.engine)
+            columns = [column['name'] for column in inspector.get_columns('game_session')]
+            
+            # Add the column if it doesn't exist
+            if 'password' not in columns:
+                db.engine.execute('ALTER TABLE game_session ADD COLUMN password VARCHAR(500)')
+                print("Added password column to game_session table")
+        except Exception as e:
+            print(f"Note: {e}")
+        
         db.create_all()
         
         # Create admin user if doesn't exist
