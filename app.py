@@ -165,6 +165,9 @@ def google_post_auth():
         # Resume the session and always set next_level to "easy"
         flash("Welcome back! Resuming your progress.", "success")
         session["next_level"] = "easy"
+        session["session_start_time"] = int(existing_session.created_at.timestamp())
+        session["session_score"] = existing_session.score or 0
+        session["session_password"] = getattr(existing_session, "password", "") or ""  # Store last password
     else:
         # Create a new session if none exists
         new_session = GameSession(
@@ -179,6 +182,9 @@ def google_post_auth():
         db.session.add(new_session)
         db.session.commit()
         session["next_level"] = "easy"  # Start from the easy level
+        session["session_start_time"] = int(datetime.utcnow().timestamp())
+        session["session_score"] = 0
+        session["session_password"] = ""
         flash("New session started. Good luck!", "success")
     # --- End session handling ---
 
@@ -648,6 +654,9 @@ def update_score():
                 elif level == "impossible":
                     cleared_level_message = "🏆 Impossible completed! You beat the game!"
 
+        # Store the latest password in session for resume
+        session["session_password"] = password
+
         db.session.commit()
 
         return jsonify({
@@ -761,6 +770,14 @@ def get_next_level():
     next_level = session.get("next_level", "easy")  # Default to "easy" if not set
     return jsonify({"next_level": next_level})
 
+@app.route('/api/session_state')
+def get_session_state():
+    # Returns the session start time, score, and password for resume
+    start_time = session.get("session_start_time", int(datetime.utcnow().timestamp()))
+    score = session.get("session_score", 0)
+    password = session.get("session_password", "")
+    return jsonify({"session_start_time": start_time, "session_score": score, "session_password": password})
+
 def init_database():
     """Initialize database with default data"""
     with app.app_context():
@@ -850,3 +867,4 @@ def init_database():
 if __name__ == '__main__':
     init_database()
     app.run(debug=True, host='0.0.0.0', port=5000)
+# No code changes required for Python 3.10 and Flask 2.x compatibility.

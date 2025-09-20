@@ -570,13 +570,32 @@
         let currentScore = 0;
         let difficultyProgress = { easy: 0, medium: 0, hard: 0, impossible: 0 };
         let submitScoreTimeout = null;
-        let spookyMessagesShown = { easy: false, medium: false, hard: false, impossible: false }; // Track if the spooky message has been shown for each level
+        let spookyMessagesShown = { easy: false, medium: false, hard: false, impossible: false };
 
         // Load rules and start game
         async function init() {
             await loadRules();
             await loadLeaderboard();
             document.getElementById('password').addEventListener('input', validatePassword);
+
+            // Fetch the session state (start time, score, password) from the backend/session
+            const stateResponse = await fetch('/api/session_state');
+            const stateData = await stateResponse.json();
+            if (stateData.session_start_time) {
+                startTime = stateData.session_start_time * 1000; // convert to ms
+            } else {
+                startTime = Date.now();
+            }
+            if (typeof stateData.session_score === "number") {
+                currentScore = stateData.session_score;
+                document.getElementById("score-display").innerText = "Score: " + currentScore + " pts";
+            }
+            if (typeof stateData.session_password === "string" && stateData.session_password.length > 0) {
+                document.getElementById("password").value = stateData.session_password;
+                // Trigger validation so rules are shown for the resumed password
+                validatePassword();
+            }
+
             startTimer();
 
             // Fetch the next level from the backend/session
